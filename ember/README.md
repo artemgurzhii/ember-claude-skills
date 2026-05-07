@@ -39,6 +39,18 @@ From the Claude Code CLI:
 /plugin install /Users/artemhurzhii/Programming/Work/ember-claude-skills/ember
 ```
 
+## Coming from an older Ember version?
+
+Use the matching legacy plugin in this repo first, finish the migration, then return here:
+
+| You're on | Use |
+|---|---|
+| Ember 2.x | [`ember-2-legacy/`](../ember-2-legacy) → drives 2 → 3.28 |
+| Ember 3.x | [`ember-3-legacy/`](../ember-3-legacy) → drives Octane adoption + 3.28 → 4.12 |
+| Ember 4.x | [`ember-4-legacy/`](../ember-4-legacy) → drives 4.12 → latest 5.x LTS |
+
+Each legacy plugin includes a migrator agent that refuses to start until the prior phase's prerequisites are checked, so the chain is hard to skip.
+
 ## Sources
 
 This plugin draws from:
