@@ -1,0 +1,11 @@
+{
+  "name": "ember-2-legacy",
+  "description": "EmberJS 2.x (Aug 2015 – 2.18 LTS Dec 2017) — classic component model, Ember.Object.extend, computed properties, mixins, two-way bindings, classic test API. Use when working in a frozen 2.x codebase, when explaining classic patterns, or when planning a 2 → 3 upgrade. Includes a 2.18 → 3.28 migration skill.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Artem Hurzhii"
+  },
+  "license": "MIT",
+  "agents": "./agents",
+  "skills": "./skills"
+}
