@@ -344,7 +344,6 @@ Polaris assumes Embroider.
 | Tool | Purpose |
 |---|---|
 | [Ember Inspector](https://github.com/emberjs/ember-inspector) (browser ext) | Routes, components, services, store records — your X-ray. |
-| [`ember-cli-vite`](https://github.com/embroider-build/ember-vite-cli-adapter) | Vite-powered dev server. Significantly faster HMR. |
 | [`ember-auto-import`](https://github.com/embroider-build/ember-auto-import) | `import 'lodash'` from npm without an addon wrapper. (Default in modern setups.) |
 
 ## Choosing well — heuristics
