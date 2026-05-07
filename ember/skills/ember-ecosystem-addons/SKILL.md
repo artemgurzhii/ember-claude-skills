@@ -338,7 +338,6 @@ Polaris assumes Embroider.
 | [`ember-keyboard`](https://github.com/adopted-ember-addons/ember-keyboard) | Declarative keyboard shortcuts with priority/scope. |
 | [`ember-animated`](http://ember-animated.com) | Animations and transitions tied to Ember's render cycle. |
 | [`ember-cli-deprecation-workflow`](https://github.com/mixonic/ember-cli-deprecation-workflow) | Bulk-snooze deprecations during upgrades, fix them in waves. |
-| [`ember-data-storefront`](https://github.com/embermap/ember-data-storefront) | Cache-friendly wrappers around Ember Data — *(check current maintenance status before adopting)*. |
 
 ## Dev tooling
 
