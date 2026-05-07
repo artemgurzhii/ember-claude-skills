@@ -335,7 +335,6 @@ Polaris assumes Embroider.
 | [`tracked-built-ins`](https://github.com/tracked-tools/tracked-built-ins) | `TrackedArray`, `TrackedMap`, `TrackedSet`, `TrackedWeakMap` — reactive primitives with a familiar API. |
 | [`ember-element-helper`](https://github.com/tildeio/ember-element-helper) | `(element "h1")` to render dynamic tags. |
 | [`ember-on-helper`](https://github.com/buschtoens/ember-on-helper) | Functional `(on "click" this.fn)` for use in `(component ...)` and contextual components. |
-| [`ember-stargate`](https://github.com/Cropster/ember-stargate) | Portals — render content into another part of the DOM tree. |
 | [`ember-keyboard`](https://github.com/adopted-ember-addons/ember-keyboard) | Declarative keyboard shortcuts with priority/scope. |
 | [`ember-animated`](http://ember-animated.com) | Animations and transitions tied to Ember's render cycle. |
 | [`ember-cli-deprecation-workflow`](https://github.com/mixonic/ember-cli-deprecation-workflow) | Bulk-snooze deprecations during upgrades, fix them in waves. |
