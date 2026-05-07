@@ -268,10 +268,6 @@ ember install ember-svg-jar
 {{svg-jar "user-circle" class="w-6 h-6"}}
 ```
 
-### [`ember-cli-tailwind`](https://github.com/embermap/ember-cli-tailwind) (or DIY postcss)
-
-Tailwind in Ember. Most teams set up Tailwind via `ember-cli-postcss` directly — `ember-cli-tailwind` is a thin convenience wrapper.
-
 ## Linting / quality
 
 ### [`ember-template-lint`](https://github.com/ember-template-lint/ember-template-lint)

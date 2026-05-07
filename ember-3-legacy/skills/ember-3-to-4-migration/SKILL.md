@@ -130,7 +130,6 @@ Adopting Embroider is a separate week of work. Don't bundle it with the version 
 | `ember-intl` | Alive. | Bump major; the API became more closely aligned with Intl. |
 | `ember-simple-auth` | Alive (Mainmatter). | Bump major. |
 | `ember-concurrency` | Alive. | Bump major; signature types added. |
-| `ember-cli-tailwind` | Less maintained. | Migrate to direct Tailwind via PostCSS. |
 | `liquid-fire` | Likely abandoned. | Replace with `ember-animated` or hand-rolled. |
 | Any addon < 1k installs and last release > 3y | Replace or fork. | Migrating an abandoned addon is rarely worth it. |
 
