@@ -1,0 +1,11 @@
+{
+  "name": "ember-4-legacy",
+  "description": "EmberJS 4.x (Jan 2022 – 4.12 LTS Aug 2023) — the Octane-only era. jQuery removed, classic components and Ember.X globals gone, ember-data 4 typing, official TypeScript without ember-cli-typescript, Embroider becomes practical. Use when working in a 4.x codebase, or planning a 4.12 → 5.x upgrade. Includes a 4.12 → 5.x migration skill.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Artem Hurzhii"
+  },
+  "license": "MIT",
+  "agents": "./agents",
+  "skills": "./skills"
+}
