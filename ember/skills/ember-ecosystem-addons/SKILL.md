@@ -178,6 +178,45 @@ ember install ember-power-select
 
 Companion: `ember-power-calendar`, `ember-power-select-typeahead`.
 
+### [`ember-primitives`](https://github.com/universal-ember/ember-primitives)
+
+Headless, accessible UI primitives for Ember — the rough equivalent of Radix UI / shadcn for the React world. Maintained by NullVoxPopuli. Ships unstyled `<Menu>`, `<Dialog>`, `<Popover>`, `<Switch>`, `<Tabs>`, `<Tooltip>`, `<Form>`, `<DropdownMenu>`, and a growing list of patterns. `.gts`-first, Polaris-friendly, Glint-typed.
+
+Reach for `ember-primitives` when you want **behavior + a11y + focus management for free** but you want to own the styling. Pair it with Tailwind or your design tokens.
+
+```bash
+pnpm add ember-primitives
+```
+
+```ts
+// app/components/share-menu.gts
+import Component from '@glimmer/component';
+import { Menu } from 'ember-primitives';
+import { on } from '@ember/modifier';
+
+export default class ShareMenu extends Component {
+  copyLink = () => navigator.clipboard.writeText(window.location.href);
+
+  <template>
+    <Menu as |m|>
+      <m.Trigger class="btn">Share</m.Trigger>
+      <m.Content class="menu">
+        <m.Item {{on "click" this.copyLink}}>Copy link</m.Item>
+        <m.Item>Email…</m.Item>
+        <m.Separator />
+        <m.Item disabled>Print</m.Item>
+      </m.Content>
+    </Menu>
+  </template>
+}
+```
+
+Notes:
+- Each primitive yields a hash of contextual sub-components — same shape as the contextual-component pattern documented in `ember-components-and-templates`.
+- Strict mode (`.gts`) is the canonical authoring environment. The classic loose-mode resolver path works but is not the focus.
+- Compose with `ember-modifier` and `ember-resources` for custom interactions; `ember-primitives` rarely needs to be subclassed.
+- For "I want a complete styled component library, not primitives," look elsewhere — primitives are intentionally unstyled. There is no canonical "shadcn for Ember" yet; pairing `ember-primitives` with a small set of project-specific styled wrappers is the current best path.
+
 ### [`ember-truth-helpers`](https://github.com/jmurphyau/ember-truth-helpers) (or `@ember/truth-helpers` in 5+)
 
 Adds `eq`, `not`, `and`, `or`, `is-equal`, `lt`, `gt` template helpers. Without these, you can't combine booleans in templates.
