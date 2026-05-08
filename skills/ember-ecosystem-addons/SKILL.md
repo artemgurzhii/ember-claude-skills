@@ -704,7 +704,18 @@ this.sentry.captureMessage('Order submitted with manual override', 'warning');
 Notes:
 - Errors should always be reported via `this.sentry.captureException(...)` — never `import * as Sentry from '@sentry/ember'` at a call site, since that pulls the SDK back into the main bundle and undoes the lazy load. The service is the only sanctioned entry point.
 - `ember-concurrency` task errors bubble through `Ember.onerror`, so Sentry hooks them automatically — no manual `try/catch` needed for unhandled task failures.
-- Source maps: install `@sentry/cli`, set `SENTRY_AUTH_TOKEN`, and run `sentry-cli sourcemaps upload --release=$RELEASE dist/` after `ember build` so production stack traces de-minify.
+- Source maps: install `@sentry/cli` and add a `sentry:sourcemaps` script that runs after `ember deploy production` so production stack traces de-minify in the Sentry UI:
+
+  ```json
+  // package.json
+  {
+    "scripts": {
+      "sentry:sourcemaps": "sentry-cli sourcemaps inject --org my-org --project my-app ./dist && sentry-cli sourcemaps upload --org my-org --project my-app ./dist"
+    }
+  }
+  ```
+
+  Replace `my-org` / `my-app` with your Sentry org and project slugs. Set `SENTRY_AUTH_TOKEN` in the deploy environment so the CLI can authenticate. The `inject` step embeds debug IDs into the built JS *before* upload — skip it and Sentry can't reliably tie a stack frame to its source map across releases. Wire it as `pnpm ember deploy production && pnpm sentry:sourcemaps` in CI (or your release runbook) so the upload always trails a successful deploy.
 - For FastBoot / SSR, install `@sentry/node` in the FastBoot app separately — `@sentry/ember` is browser-only.
 - Tune `tracesSampleRate` and `replaysSessionSampleRate` per environment in `config/environment.js`; full sampling in production gets expensive fast.
 
