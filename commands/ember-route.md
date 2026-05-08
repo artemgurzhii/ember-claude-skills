@@ -108,6 +108,7 @@ import { module, test } from 'qunit';
 import { visit, currentURL } from '@ember/test-helpers';
 import { setupApplicationTest } from 'my-app/tests/helpers';
 import { setupMirage } from 'ember-cli-mirage/test-support';
+import page from 'my-app/tests/pages/my-page';
 
 module('Acceptance | <name>', function (hooks) {
   setupApplicationTest(hooks);
@@ -116,14 +117,15 @@ module('Acceptance | <name>', function (hooks) {
   test('visiting <url>', async function (assert) {
     {{#if model}}this.server.create('{{model}}', { id: '1' });{{/if}}
 
-    await visit('<url>');
+    await page.visit();
 
     assert.strictEqual(currentURL(), '<url>');
   });
 
   {{#if auth}}
   test('unauthenticated visit redirects to /login', async function (assert) {
-    await visit('<url>');
+    await page.visit();
+
     assert.strictEqual(currentURL(), '/login');
   });
   {{/if}}

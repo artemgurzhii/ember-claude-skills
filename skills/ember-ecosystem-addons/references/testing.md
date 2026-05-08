@@ -42,8 +42,9 @@ ember install ember-a11y-testing
 
 ```ts
 import a11yAudit from 'ember-a11y-testing/test-support/audit';
+import page from 'my-app/tests/pages/my-page';
 
-await visit('/');
+await page.visit();
 await a11yAudit();
 ```
 

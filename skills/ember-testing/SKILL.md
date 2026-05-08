@@ -149,6 +149,7 @@ In tests:
 
 ```ts
 import { setupMirage } from 'ember-cli-mirage/test-support';
+import page from 'my-app/tests/pages/posts';
 
 module('Application | posts', function (hooks) {
   setupApplicationTest(hooks);
@@ -157,7 +158,7 @@ module('Application | posts', function (hooks) {
   test('lists posts', async function (assert) {
     this.server.createList('post', 3);
 
-    await visit('/posts');
+    await page.visit();
 
     assert.dom('[data-test-post-row]').exists({ count: 3 });
   });
@@ -221,7 +222,8 @@ For a route's `model`/`beforeModel`/`afterModel` logic, write an **application t
 
 ```ts
 test('unauthenticated visit to /dashboard redirects to /login', async function (assert) {
-  await visit('/dashboard');
+  await page.visit();
+
   assert.strictEqual(currentURL(), '/login');
 });
 ```
@@ -258,9 +260,10 @@ For tricky cases use `await waitFor('[data-test-loaded]')` or `await waitUntil((
 
 ```ts
 import a11yAudit from 'ember-a11y-testing/test-support/audit';
+import page from 'my-app/tests/pages/home';
 
 test('home page is accessible', async function (assert) {
-  await visit('/');
+  await page.visit();
   await a11yAudit();
   assert.ok(true, 'no a11y errors');
 });

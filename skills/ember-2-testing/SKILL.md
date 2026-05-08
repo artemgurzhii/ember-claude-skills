@@ -125,13 +125,15 @@ test('visiting /posts', function (assert) {
 // modernized
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
-import { visit, currentURL } from '@ember/test-helpers';
+import { currentURL } from '@ember/test-helpers';
+import page from 'my-app/tests/pages/posts';
 
 module('Acceptance | posts', function (hooks) {
   setupApplicationTest(hooks);
 
   test('visiting /posts', async function (assert) {
-    await visit('/posts');
+    await page.visit();
+
     assert.strictEqual(currentURL(), '/posts');
   });
 });
