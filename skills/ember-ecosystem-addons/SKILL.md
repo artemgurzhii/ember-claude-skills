@@ -1,6 +1,6 @@
 ---
 name: ember-ecosystem-addons
-description: Curated reference of top-rated Ember addons (per emberobserver.com) — what each one is for, when to install it, the canonical install command, and a tiny usage example. Covers ember-simple-auth, ember-cookies, ember-concurrency, ember-test-selectors, ember-cli-page-object, ember-cli-mirage, ember-basic-dropdown, ember-power-select, ember-power-calendar, ember-power-datepicker, ember-headless-form, ember-cli-flash, ember-page-title, ember-shepherd, ember-modifier, ember-resources, ember-intl, ember-svg-jar, and more. Use when picking an addon, when debugging "what does this addon do," or when scaffolding a new feature that should reuse community standards.
+description: Curated reference of top-rated Ember addons (per emberobserver.com) — what each one is for, when to install it, the canonical install command, and a tiny usage example. Covers ember-simple-auth, ember-cookies, ember-concurrency, ember-test-selectors, ember-cli-page-object, ember-cli-mirage, ember-basic-dropdown, ember-power-select, ember-power-calendar, ember-power-datepicker, ember-headless-form, ember-cli-flash, ember-page-title, ember-shepherd, ember-modifier, ember-resources, ember-intl, ember-svg-jar, @sentry/ember, and more. Use when picking an addon, when debugging "what does this addon do," or when scaffolding a new feature that should reuse community standards.
 type: reference
 ---
 
@@ -544,6 +544,85 @@ ember install ember-page-title
 ```
 
 Renders `<title>My First Post — Posts — Acme</title>`. Use the `separator` argument once at the leaf — it controls how that segment joins to its parent. Prefer this to manually setting `document.title` from routes; `ember-page-title` updates the head reactively as routes transition, plays well with FastBoot, and is the convention every Polaris app expects.
+
+## Error monitoring
+
+### [`@sentry/ember`](https://docs.sentry.io/platforms/javascript/guides/ember/)
+
+The official Sentry SDK for Ember. Captures unhandled errors from router transitions, actions, ember-concurrency tasks, and template rendering, plus performance traces for route transitions, components, and ember-data requests. Hooks into Ember's `instrument` events so coverage is broader than a plain `@sentry/browser` install.
+
+```bash
+ember install @sentry/ember
+```
+
+The SDK is heavy (tracing + replay together push ~100 KB gzipped). For initial-load performance, keep `@sentry/ember` out of the main bundle by lazy-loading it from an initializer that defers app readiness until the chunk lands. Pair that with a dedicated `app/sentry.ts` file that owns the `Sentry.init` config — `app/app.ts` stays small and `Sentry.init` lives in one obvious place.
+
+```ts
+// app/sentry.ts — owns the Sentry.init config; runs after window.Sentry is set
+import config from 'my-app/config/environment';
+
+declare global {
+  interface Window {
+    Sentry: typeof import('@sentry/ember');
+  }
+}
+
+window.Sentry.init({
+  dsn: config.sentry.dsn,
+  environment: config.environment,
+  release: config.APP.version,
+  tracesSampleRate: 0.1,
+  replaysSessionSampleRate: 0,
+  replaysOnErrorSampleRate: 1.0,
+  integrations: [
+    window.Sentry.browserTracingIntegration(),
+    window.Sentry.replayIntegration({ maskAllText: false, blockAllMedia: true }),
+  ],
+});
+```
+
+```ts
+// app/initializers/load-externals.ts — lazy-load Sentry as its own chunk
+import Application from '@ember/application';
+
+export async function initialize(app: Application): Promise<void> {
+  app.deferReadiness();
+
+  window.Sentry = await import('@sentry/ember');
+
+  app.advanceReadiness();
+}
+
+export default {
+  name: 'load-externals',
+  initialize,
+};
+```
+
+`deferReadiness` / `advanceReadiness` hold the app boot until the dynamic `import()` resolves, so by the time routes mount Sentry is fully wired. The SDK still patches Ember's runtime hooks (router transitions, `ember-concurrency` tasks, components) because that patching happens during `Sentry.init`, not at module import time. `app/sentry.ts` is then dynamically imported alongside the SDK chunk — extend the same initializer with `await import('my-app/sentry')` after the `window.Sentry` assignment, or wire it from your own externals-loading convention.
+
+```js
+// ember-cli-build.js — opt out of pieces of the auto-instrumentation
+let app = new EmberApp(defaults, {
+  sentry: {
+    disablePerformance: false,
+    disableInstrumentComponents: false,
+    ignoreEmberOnerrorPanic: false,
+  },
+});
+```
+
+```ts
+// Manual capture from a service or component — use window.Sentry, not a static import
+window.Sentry.captureException(err, { tags: { feature: 'checkout' } });
+```
+
+Notes:
+- Never `import * as Sentry from '@sentry/ember'` at the top of a hot-path module — that pulls the SDK back into the main bundle and undoes the lazy load. Always read it off `window.Sentry`, or `await import('@sentry/ember')` inside an async boundary.
+- `ember-concurrency` task errors bubble through `Ember.onerror`, so Sentry hooks them automatically — no manual `try/catch` needed for unhandled task failures.
+- Source maps: install `@sentry/cli`, set `SENTRY_AUTH_TOKEN`, and run `sentry-cli sourcemaps upload --release=$RELEASE dist/` after `ember build` so production stack traces de-minify.
+- For FastBoot / SSR, install `@sentry/node` in the FastBoot app separately — `@sentry/ember` is browser-only.
+- Tune `tracesSampleRate` and `replaysSessionSampleRate` per environment in `config/environment.js`; full sampling in production gets expensive fast.
 
 ## Linting / quality
 
