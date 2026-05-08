@@ -612,13 +612,97 @@ let app = new EmberApp(defaults, {
 });
 ```
 
+Wrap every call site behind a thin `sentry` service so the rest of the app never touches `window.Sentry` directly. That keeps the lazy-load contract intact (no static `@sentry/ember` imports outside of `app/sentry.ts` and the initializer) and gives you one chokepoint for swapping providers, stubbing in tests, or adding tags app-wide.
+
 ```ts
-// Manual capture from a service or component — use window.Sentry, not a static import
-window.Sentry.captureException(err, { tags: { feature: 'checkout' } });
+// app/services/sentry.ts
+import Service from '@ember/service';
+import type {
+  CaptureContext,
+  Scope,
+  SeverityLevel,
+  User,
+} from '@sentry/ember';
+
+export default class SentryService extends Service {
+  setUser(user: User | null): void {
+    window.Sentry.setUser(user);
+  }
+
+  captureException(error: unknown, context?: CaptureContext): string {
+    return window.Sentry.captureException(error, context);
+  }
+
+  captureMessage(message: string, level: SeverityLevel = 'info'): string {
+    return window.Sentry.captureMessage(message, level);
+  }
+
+  getCurrentScope(): Scope {
+    return window.Sentry.getCurrentScope();
+  }
+}
+
+declare module '@ember/service' {
+  interface Registry {
+    sentry: SentryService;
+  }
+}
+```
+
+Type-only imports (`import type { ... } from '@sentry/ember'`) are erased by TypeScript and don't pull the SDK into the main bundle — only the runtime calls go through `window.Sentry`, which is populated by the lazy chunk.
+
+```ts
+// app/routes/application.ts — identify the user once the session is restored
+import Route from '@ember/routing/route';
+import { service } from '@ember/service';
+import type SessionService from 'ember-simple-auth/services/session';
+import type SentryService from 'my-app/services/sentry';
+
+export default class ApplicationRoute extends Route {
+  @service declare session: SessionService;
+  @service declare sentry: SentryService;
+
+  async beforeModel() {
+    await this.session.setup();
+    if (this.session.isAuthenticated) {
+      const { id, email } = this.session.data.authenticated.user;
+      this.sentry.setUser({ id, email });
+    } else {
+      this.sentry.setUser(null);
+    }
+  }
+}
+```
+
+```ts
+// app/components/checkout-button.ts — handle errors through the service
+import Component from '@glimmer/component';
+import { service } from '@ember/service';
+import { action } from '@ember/object';
+import type SentryService from 'my-app/services/sentry';
+
+export default class CheckoutButton extends Component {
+  @service declare sentry: SentryService;
+
+  @action async charge() {
+    try {
+      await this.args.onCharge();
+    } catch (err) {
+      this.sentry.captureException(err, { tags: { feature: 'checkout' } });
+      throw err;
+    }
+  }
+}
+```
+
+```ts
+// Add request-scoped context without leaking it across users
+this.sentry.getCurrentScope().setContext('order', { id: order.id, total: order.total });
+this.sentry.captureMessage('Order submitted with manual override', 'warning');
 ```
 
 Notes:
-- Never `import * as Sentry from '@sentry/ember'` at the top of a hot-path module — that pulls the SDK back into the main bundle and undoes the lazy load. Always read it off `window.Sentry`, or `await import('@sentry/ember')` inside an async boundary.
+- Errors should always be reported via `this.sentry.captureException(...)` — never `import * as Sentry from '@sentry/ember'` at a call site, since that pulls the SDK back into the main bundle and undoes the lazy load. The service is the only sanctioned entry point.
 - `ember-concurrency` task errors bubble through `Ember.onerror`, so Sentry hooks them automatically — no manual `try/catch` needed for unhandled task failures.
 - Source maps: install `@sentry/cli`, set `SENTRY_AUTH_TOKEN`, and run `sentry-cli sourcemaps upload --release=$RELEASE dist/` after `ember build` so production stack traces de-minify.
 - For FastBoot / SSR, install `@sentry/node` in the FastBoot app separately — `@sentry/ember` is browser-only.
