@@ -287,6 +287,135 @@ this.user = { id: 1, name: 'Ada', isAdmin: true };
 
 For Mirage, keep factories minimal and use traits (`Factory.extend({ traits: { admin: trait({ role: 'admin' }) } })`) for variants.
 
+## Acceptance test example
+
+```hbs
+<!-- app/templates/application.hbs -->
+
+<HeadlessForm data-test-form as |form|>
+  <form.Field @name='name' as |field|>
+    <div data-test-form-name>
+      <field.Label>Name</field.Label>
+      <field.Input data-test-form-name-input />
+      <field.Errors data-test-form-name-errors />
+    </div>
+  </form.Field>
+
+  <button type='submit' disabled={{form.isInvalid}} data-test-form-submit>Submit</button>
+</HeadlessForm>
+```
+
+```ts
+// tests/pages/application.ts
+
+import {
+  create,
+  visitable,
+  fillable,
+  clickable,
+  property,
+  isPresent,
+  text,
+} from 'ember-cli-page-object';
+
+export default create({
+  visit: visitable('/'),
+
+  form: {
+    scope: '[data-test-form]',
+
+    name: {
+      fill: fillable('[data-test-form-name-input]'),
+
+      errors: {
+        scope: '[data-test-form-name-errors]',
+
+        text: text(),
+        isPresent: isPresent(),
+      },
+    },
+
+    submit: {
+      scope: '[data-test-form-submit]',
+
+      isDisabled: property('disabled'),
+
+      click: clickable(),
+    },
+  },
+});
+
+```
+
+```ts
+// tests/acceptance/application-test.ts
+
+module('Acceptance | application', function (hooks) {
+  setupApplicationTest(hooks, {});
+
+  test('form works correctly', async function (assert) {
+    assert.expect(6);
+
+    await page.visit();
+
+    assert.strictEqual(
+      currentURL(),
+      '/',
+      'root page is opened',
+    );
+
+    await snapshot('/application: edit form is shown');
+
+    await page.form.name.fill('');
+    await page.form.submit.click();
+
+    assert.ok(
+      page.form.name.errors.isPresent,
+      'form name input error section is shown',
+    );
+
+    assert.strictEqual(
+      page.form.name.errors.text,
+      'Name is required', // or take it from translation file
+      'correct validation error message is shown',
+    );
+
+    assert.ok(
+      page.form.submit.isDisabled,
+      'submit button is marked as disabled when form is invalid',
+    );
+
+    await page.form.name.fill('lorem');
+
+    assert.notOk(
+      page.form.submit.isDisabled,
+      'submit button is enabled when form is valid',
+    );
+
+    window.server.patch(
+      '/users/:id',
+      function ({ users }, { requestBody }) {
+        const {
+          data: { id, attributes },
+        } = JSON.parse(requestBody);
+
+        assert.strictEqual(
+          attributes.name,
+          name,
+          'patch request is made for the user with new name',
+        );
+
+        const attrs = this.normalizedRequestAttrs('user');
+
+        return users.find(id).update(attrs);
+      },
+    );
+
+    await page.form.submit.click();
+  });
+});
+```
+
 ## Anti-patterns
 
 | Anti-pattern | Fix |
@@ -297,6 +426,7 @@ For Mirage, keep factories minimal and use traits (`Factory.extend({ traits: { a
 | Application tests that fill in many forms | Split into focused rendering tests; keep applications for the happy paths. |
 | One mega `module` with shared `let user;` | Each test sets up its own state — DAMP > DRY in tests. |
 | `assert.equal(x, true)` | `assert.true(x)` / `assert.dom('...').isChecked()` etc. — clearer failures. |
+| Recommended to create ember page objects for complex pages/components |
 
 ## Verification
 
