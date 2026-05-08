@@ -60,9 +60,15 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 
-interface Args { user: User; }
+interface Signature {
+  Element: HTMLDivElement;
 
-export default class UserCard extends Component<{ Args: Args }> {
+  Args: {
+    user: User;
+  }
+}
+
+export default class UserCard extends Component<Signature> {
   @tracked isExpanded = false;
 
   @action toggle() { this.isExpanded = !this.isExpanded; }
