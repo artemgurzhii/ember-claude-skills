@@ -1,6 +1,6 @@
 ---
 name: ember-ecosystem-addons
-description: Curated reference of top-rated Ember addons (per emberobserver.com) — what each one is for, when to install it, the canonical install command, and a tiny usage example. Covers ember-simple-auth, ember-cookies, ember-concurrency, ember-test-selectors, ember-cli-page-object, ember-cli-mirage, ember-basic-dropdown, ember-power-select, ember-power-calendar, ember-power-datepicker, ember-headless-form, ember-cli-flash, ember-page-title, ember-shepherd, ember-modifier, ember-resources, ember-intl, ember-svg-jar, @sentry/ember, and more. Use when picking an addon, when debugging "what does this addon do," or when scaffolding a new feature that should reuse community standards.
+description: Curated reference of top-rated Ember addons (per emberobserver.com) — what each one is for, when to install it, the canonical install command, and a tiny usage example. Covers ember-simple-auth, ember-cookies, ember-concurrency, ember-test-selectors, ember-cli-page-object, ember-cli-mirage, ember-basic-dropdown, ember-power-select, ember-power-calendar, ember-power-datepicker, ember-headless-form, ember-changeset, ember-changeset-validations, ember-cli-flash, ember-page-title, ember-shepherd, ember-modifier, ember-resources, ember-intl, ember-svg-jar, @sentry/ember, and more. Use when picking an addon, when debugging "what does this addon do," or when scaffolding a new feature that should reuse community standards.
 type: reference
 ---
 
@@ -296,6 +296,91 @@ pnpm add ember-headless-form
 ```
 
 Pair with a validation library (`yup`, `zod`, `valibot`) via the `@validate` argument when native-constraint validation isn't enough. Reach for this instead of hand-rolling form state in component classes.
+
+### [`ember-changeset`](https://github.com/adopted-ember-addons/ember-changeset)
+
+A buffered, rollback-able wrapper around POJOs and Ember Data records. Tracks edits in memory, exposes `isDirty` / `isInvalid` / `changes` / `errors`, applies the buffer on `save()` / `execute()`, or discards it via `rollback()`. The standard answer to "I want unsaved-form state separate from the canonical model," and the usual companion to `ember-changeset-validations`.
+
+```bash
+ember install ember-changeset
+```
+
+```ts
+import Component from '@glimmer/component';
+import { action } from '@ember/object';
+import { Changeset } from 'ember-changeset';
+
+export default class UserEditForm extends Component {
+  changeset = Changeset(this.args.user);
+
+  @action update(key: string, event: Event) {
+    this.changeset.set(key, (event.target as HTMLInputElement).value);
+  }
+
+  @action async save() {
+    if (this.changeset.isInvalid) return;
+    await this.changeset.save();   // applies buffer to the underlying model
+  }
+
+  @action cancel() {
+    this.changeset.rollback();
+  }
+}
+```
+
+```hbs
+<input
+  value={{this.changeset.email}}
+  {{on "input" (fn this.update "email")}}
+/>
+{{#if this.changeset.error.email}}
+  <p class="error">{{this.changeset.error.email.validation}}</p>
+{{/if}}
+
+<button type="button" {{on "click" this.save}} disabled={{this.changeset.isInvalid}}>
+  Save
+</button>
+<button type="button" {{on "click" this.cancel}}>Cancel</button>
+```
+
+`save()` calls the underlying model's `save()` if it exists (Ember Data records); otherwise it just applies the buffer. `execute()` applies without saving when you want to commit locally.
+
+### [`ember-changeset-validations`](https://github.com/adopted-ember-addons/ember-changeset-validations)
+
+Drop-in validators for `ember-changeset` — `validatePresence`, `validateLength`, `validateFormat`, `validateNumber`, `validateInclusion`, `validateConfirmation`. Compose into a key-by-key map and pass to the changeset; no hand-rolled validator functions.
+
+```bash
+ember install ember-changeset-validations
+```
+
+```ts
+// app/validations/user.ts
+import {
+  validatePresence,
+  validateLength,
+  validateFormat,
+  validateNumber,
+} from 'ember-changeset-validations/validators';
+
+export default {
+  email:    [validatePresence(true), validateFormat({ type: 'email' })],
+  password: validateLength({ min: 8, max: 128 }),
+  age:      validateNumber({ integer: true, gte: 13 }),
+};
+```
+
+```ts
+import { Changeset } from 'ember-changeset';
+import lookupValidator from 'ember-changeset-validations';
+import UserValidations from 'my-app/validations/user';
+
+changeset = Changeset(this.args.user, lookupValidator(UserValidations), UserValidations);
+```
+
+Notes:
+- For new strict-mode (`.gts`) work, prefer `ember-headless-form` + `yup` / `zod` / `valibot` — that path is more actively maintained and aligns with the Polaris form story.
+- Reach for `ember-changeset` when editing Ember Data records in place and you want a real `rollback()`, when an existing classic-mode app already uses changesets, or when you need nested-edit support that the headless-form schema validators don't cover cleanly.
+- Both addons live under `adopted-ember-addons` — release cadence is slow but stable; they still work on modern Ember.
 
 ### [`ember-primitives`](https://github.com/universal-ember/ember-primitives)
 
@@ -760,7 +845,7 @@ Polaris assumes Embroider.
 ## Choosing well — heuristics
 
 1. **Check emberobserver.com**: install count, score, last release, TypeScript support. Sub-1k installs and stale releases are red flags.
-2. **Prefer Mainmatter / NullVoxPopuli / ember-modifier / ember-intl–maintained addons** — these orgs ship reliably.
+2. **Prefer Mainmatter / NullVoxPopuli / ember-power-addons / ember-modifier / ember-intl–maintained addons** — these orgs ship reliably.
 3. **Beware "Ember 1.x rewrites"** — anything written before Octane often relies on classic patterns.
 4. **Read the README + look at the test suite** before installing. Quality of tests = quality of addon.
 5. **Don't pile on convenience addons** — every dep is upgrade weight. If the addon wraps 30 lines, copy the 30 lines.
