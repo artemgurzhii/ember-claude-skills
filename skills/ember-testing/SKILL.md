@@ -160,7 +160,7 @@ module('Application | posts', function (hooks) {
 
     await page.visit();
 
-    assert.dom('[data-test-post-row]').exists({ count: 3 });
+    assert.strictEqual(page.posts.length, 3, '3 post rows are shown on the page');
   });
 });
 ```

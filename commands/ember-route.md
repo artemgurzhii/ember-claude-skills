@@ -119,7 +119,7 @@ module('Acceptance | <name>', function (hooks) {
 
     await page.visit();
 
-    assert.strictEqual(currentURL(), '<url>');
+    assert.strictEqual(currentURL(), '/my-page');
   });
 
   {{#if auth}}
