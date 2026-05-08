@@ -1,6 +1,6 @@
 ---
 name: ember-ecosystem-addons
-description: Curated reference of top-rated Ember addons (per emberobserver.com) — what each one is for, when to install it, the canonical install command, and a tiny usage example. Covers ember-simple-auth, ember-concurrency, ember-test-selectors, ember-cli-page-object, ember-cli-mirage, ember-basic-dropdown, ember-power-select, ember-power-calendar, ember-power-datepicker, ember-page-title, ember-shepherd, ember-modifier, ember-resources, ember-intl, ember-svg-jar, and more. Use when picking an addon, when debugging "what does this addon do," or when scaffolding a new feature that should reuse community standards.
+description: Curated reference of top-rated Ember addons (per emberobserver.com) — what each one is for, when to install it, the canonical install command, and a tiny usage example. Covers ember-simple-auth, ember-cookies, ember-concurrency, ember-test-selectors, ember-cli-page-object, ember-cli-mirage, ember-basic-dropdown, ember-power-select, ember-power-calendar, ember-power-datepicker, ember-headless-form, ember-cli-flash, ember-page-title, ember-shepherd, ember-modifier, ember-resources, ember-intl, ember-svg-jar, and more. Use when picking an addon, when debugging "what does this addon do," or when scaffolding a new feature that should reuse community standards.
 type: reference
 ---
 
@@ -57,6 +57,33 @@ export default class DashboardRoute extends Route {
 ```
 
 Authenticators (`session-stores/`, `authenticators/`) are pluggable. You'll likely write a small custom authenticator that hits *your* `/login` endpoint.
+
+### [`ember-cookies`](https://github.com/mainmatter/ember-cookies)
+
+Read / write cookies from anywhere — components, services, route hooks, FastBoot. The standard companion to `ember-simple-auth` when you want a cookie-backed session store, and the easy answer for any "I need to read a cookie" task that would otherwise hand-roll `document.cookie`.
+
+```bash
+ember install ember-cookies
+```
+
+```ts
+import Service, { service } from '@ember/service';
+import type CookiesService from 'ember-cookies/services/cookies';
+
+export default class ConsentService extends Service {
+  @service declare cookies: CookiesService;
+
+  get accepted() {
+    return this.cookies.read('cookie-consent') === 'yes';
+  }
+
+  accept() {
+    this.cookies.write('cookie-consent', 'yes', { maxAge: 60 * 60 * 24 * 365, path: '/' });
+  }
+}
+```
+
+Works in FastBoot — same API on server and browser, so SSR-rendered pages can read the request cookie without branching.
 
 ## Async / orchestration
 
@@ -135,6 +162,8 @@ In-browser fake API server with a database, factories, scenarios, and route hand
 ember install ember-cli-mirage
 ```
 
+Caveat: release cadence has slowed (last publish 2024-09 as of 2026-05). It still works on modern Ember and is the largest install base, but new projects increasingly reach for [MSW](https://mswjs.io) instead — same ergonomics with cross-framework support and active development. Stay on Mirage if you already have a Mirage server with factories and scenarios; consider MSW for greenfield apps.
+
 ### [`ember-a11y-testing`](https://github.com/ember-a11y/ember-a11y-testing)
 
 Wraps axe-core for in-test a11y audits.
@@ -198,7 +227,7 @@ ember install ember-power-select
 </PowerSelect>
 ```
 
-Companion: `ember-power-select-typeahead` for free-text typeahead.
+For free-text typeahead, use `<PowerSelect>` with `@searchEnabled={{true}}` plus a custom `@search` action — the standalone `ember-power-select-typeahead` companion is unmaintained (last release 2022).
 
 ### [`ember-power-calendar`](https://ember-power-calendar.com)
 
@@ -240,6 +269,34 @@ ember install ember-power-datepicker
 
 Same date-library adapter requirement as `ember-power-calendar` — install one of `-luxon` / `-moment` / `-date-fns`.
 
+### [`ember-headless-form`](https://github.com/CrowdStrike/ember-headless-form)
+
+Mainmatter / CrowdStrike-maintained headless form library — handles state, validation wiring, accessibility (label / error / `aria-describedby` plumbing), and submission lifecycle. You provide the markup; the addon manages the form mechanics. Strict-mode `.gts`-friendly and Polaris-aligned.
+
+```bash
+pnpm add ember-headless-form
+```
+
+```hbs
+<HeadlessForm @data={{this.user}} @onSubmit={{this.save}} as |form|>
+  <form.Field @name="email" as |field|>
+    <field.Label>Email</field.Label>
+    <field.Input @type="email" required />
+    <field.Errors />
+  </form.Field>
+
+  <form.Field @name="password" as |field|>
+    <field.Label>Password</field.Label>
+    <field.Input @type="password" minlength="8" />
+    <field.Errors />
+  </form.Field>
+
+  <button type="submit" disabled={{form.isSubmitting}}>Sign in</button>
+</HeadlessForm>
+```
+
+Pair with a validation library (`yup`, `zod`, `valibot`) via the `@validate` argument when native-constraint validation isn't enough. Reach for this instead of hand-rolling form state in component classes.
+
 ### [`ember-primitives`](https://github.com/universal-ember/ember-primitives)
 
 Headless, accessible UI primitives for Ember — the rough equivalent of Radix UI / shadcn for the React world. Maintained by NullVoxPopuli. Ships unstyled `<Menu>`, `<Dialog>`, `<Popover>`, `<Switch>`, `<Tabs>`, `<Tooltip>`, `<Form>`, `<DropdownMenu>`, and a growing list of patterns. `.gts`-first, Polaris-friendly, Glint-typed.
@@ -279,13 +336,15 @@ Notes:
 - Compose with `ember-modifier` and `ember-resources` for custom interactions; `ember-primitives` rarely needs to be subclassed.
 - For "I want a complete styled component library, not primitives," look elsewhere — primitives are intentionally unstyled. There is no canonical "shadcn for Ember" yet; pairing `ember-primitives` with a small set of project-specific styled wrappers is the current best path.
 
-### [`ember-truth-helpers`](https://github.com/jmurphyau/ember-truth-helpers) (or `@ember/truth-helpers` in 5+)
+### [`ember-truth-helpers`](https://github.com/jmurphyau/ember-truth-helpers)
 
 Adds `eq`, `not`, `and`, `or`, `is-equal`, `lt`, `gt` template helpers. Without these, you can't combine booleans in templates.
 
 ```bash
 ember install ember-truth-helpers
 ```
+
+Modern Ember (≥ 6.3) ships `eq`, `not`, `and`, `or` as built-in template keywords — no import needed in `.gjs` / `.gts` strict mode. Install `ember-truth-helpers` only when you're on an older Ember version, still authoring loose-mode `.hbs`, or need the extras (`is-equal`, `lt`, `gt`).
 
 ### [`@ember/render-modifiers`](https://github.com/emberjs/ember-render-modifiers)
 
@@ -332,6 +391,46 @@ const clockResource = resource(({ on }) => {
 ```
 
 Use resources for anything that produces values *over time*. Combine with `ember-concurrency` (one-shot async) for a powerful split.
+
+## Notifications
+
+### [`ember-cli-flash`](https://github.com/poteto/ember-cli-flash)
+
+Toast / flash messages with queueing, auto-dismiss, and per-message callbacks. The de-facto notification system in Ember apps — small surface area, exposes a `flashMessages` service.
+
+```bash
+ember install ember-cli-flash
+```
+
+```ts
+// app/components/save-button.ts
+import Component from '@glimmer/component';
+import { service } from '@ember/service';
+import { action } from '@ember/object';
+import type FlashMessagesService from 'ember-cli-flash/services/flash-messages';
+
+export default class SaveButton extends Component {
+  @service declare flashMessages: FlashMessagesService;
+
+  @action async save() {
+    try {
+      await this.args.onSave();
+      this.flashMessages.success('Saved.', { timeout: 3000 });
+    } catch (e) {
+      this.flashMessages.danger(`Save failed: ${e.message}`, { sticky: true });
+    }
+  }
+}
+```
+
+```hbs
+{{! app/templates/application.hbs — render once, anywhere }}
+{{#each this.flashMessages.queue as |flash|}}
+  <FlashMessage @flash={{flash}} />
+{{/each}}
+```
+
+The addon ships unstyled — bring your own classes or a Tailwind variant. For richer notification UIs (action buttons, progress, swipe-to-dismiss), pair `ember-primitives` `<Toast>` with manual queue management instead.
 
 ## Internationalization & formatting
 
@@ -473,7 +572,6 @@ Polaris assumes Embroider.
 |---|---|
 | [`tracked-built-ins`](https://github.com/tracked-tools/tracked-built-ins) | `TrackedArray`, `TrackedMap`, `TrackedSet`, `TrackedWeakMap` — reactive primitives with a familiar API. |
 | [`ember-element-helper`](https://github.com/tildeio/ember-element-helper) | `(element "h1")` to render dynamic tags. |
-| [`ember-on-helper`](https://github.com/buschtoens/ember-on-helper) | Functional `(on "click" this.fn)` for use in `(component ...)` and contextual components. |
 | [`ember-keyboard`](https://github.com/adopted-ember-addons/ember-keyboard) | Declarative keyboard shortcuts with priority/scope. |
 | [`ember-animated`](http://ember-animated.com) | Animations and transitions tied to Ember's render cycle. |
 | [`ember-cli-deprecation-workflow`](https://github.com/mixonic/ember-cli-deprecation-workflow) | Bulk-snooze deprecations during upgrades, fix them in waves. |
