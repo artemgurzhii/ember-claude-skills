@@ -36,4 +36,5 @@ Polaris assumes Embroider.
 | Tool | Purpose |
 |---|---|
 | [Ember Inspector](https://github.com/emberjs/ember-inspector) (browser ext) | Routes, components, services, store records — your X-ray. |
+| [Ember.js extension pack](https://marketplace.visualstudio.com/items?itemName=embertooling.emberjs) (VS Code) | Bundles the official Ember Tooling extensions — Glint language server, `ember-template-lint` integration, `.hbs`/`.gjs`/`.gts` syntax highlighting, and the unstable refactoring tools — in one install. The pack is the recommended editor setup for Polaris-era apps. |
 | [`ember-auto-import`](https://github.com/embroider-build/ember-auto-import) | `import 'lodash'` from npm without an addon wrapper. (Default in modern setups.) |
