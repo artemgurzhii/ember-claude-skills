@@ -119,7 +119,7 @@ module('Acceptance | application', function (hooks) {
   setupApplicationTest(hooks, {});
 
   test('form works correctly', async function (assert) {
-    assert.expect(8);
+    assert.expect(6);
 
     await page.visit();
 
