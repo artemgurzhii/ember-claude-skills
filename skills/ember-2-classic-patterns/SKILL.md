@@ -1,6 +1,6 @@
 ---
 name: ember-2-classic-patterns
-description: The canonical Ember 2.x mental model — Ember.Object.extend, Ember.computed properties, classic Ember.Component, the actions hash and {{action}}, mixins, observers, run loop scheduling, and two-way data binding via {{mut}}. Use when reading or maintaining 2.x code, when interpreting unfamiliar deprecation messages, or when explaining why a 2.x pattern translates the way it does in modern Ember.
+description: The canonical Ember 2.x mental model — Ember.Object.extend, Ember.computed, classic components, the actions hash, mixins, observers, run loop, two-way binding. Use when reading or maintaining 2.x code, decoding deprecation messages, or explaining how a 2.x pattern maps to modern Ember.
 type: reference
 ---
 

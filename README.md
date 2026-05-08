@@ -127,6 +127,7 @@ ember-claude-skills/
 ├── .claude-plugin/
 │   ├── plugin.json
 │   └── marketplace.json
+├── CLAUDE.md                       # authoring contract for this plugin
 ├── README.md
 ├── agents/
 │   ├── ember-architect.md
@@ -135,8 +136,12 @@ ember-claude-skills/
 ├── commands/
 │   └── ember-{component,route,service,test}.md
 └── skills/
-    └── ember-*/SKILL.md         # 21 skills, modern + version-specific
+    └── ember-*/
+        ├── SKILL.md                # thin index + core constraints
+        └── references/*.md         # supporting files (where applicable)
 ```
+
+Skills follow the **progressive-disclosure** pattern: `SKILL.md` is loaded when its description matches, and `references/*.md` are pulled in only when the agent navigates there. Today only `ember-ecosystem-addons` has supporting files — its 16 addon entries are split into category references (`auth.md`, `async.md`, `testing.md`, `forms-and-ui.md`, `i18n.md`, `observability.md`, `build-and-lint.md`).
 
 ## Sources
 

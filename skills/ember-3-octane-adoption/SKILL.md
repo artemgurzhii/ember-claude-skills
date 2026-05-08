@@ -1,6 +1,6 @@
 ---
 name: ember-3-octane-adoption
-description: Adopting Octane within an Ember 3.16+ app — flipping the optional features, running ember-octane-codemods (native classes, tracked, angle brackets, no-implicit-this), per-file conversion order, and the addons that unlock the new mental model. Use when transitioning a 3.x app from classic to Octane without changing the Ember version, when scoping the conversion effort, or when reviewing an Octane-conversion PR.
+description: Adopting Octane within an Ember 3.16+ app — optional features, ember-octane-codemods, per-file conversion order. Use when converting a 3.x app from classic to Octane, scoping the effort, or reviewing an Octane-conversion PR.
 type: reference
 ---
 
