@@ -1,0 +1,12 @@
+{
+  "name": "ember-claude-skills",
+  "description": "EmberJS skills, agents, and commands for Claude Code, covering every Ember era from 2.x through Octane and Polaris (5.x+). Modern authoring (Octane fundamentals, components, routing, services, Ember Data, testing, ecosystem addons, TypeScript/Glint, Polaris template tag) plus version-specific skills and migrator agents that drive 2 → 3 → 4 → 5 upgrades.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Artem Hurzhii"
+  },
+  "license": "MIT",
+  "commands": "./commands",
+  "agents": "./agents",
+  "skills": "./skills"
+}
