@@ -126,18 +126,23 @@ export default Component.extend({
 });
 ```
 
-### `this.$()` → `find()` (in tests)
+### `this.$()` → `ember-cli-page-object` (in tests)
+
+Prefer `ember-cli-page-object` over `find` from `@ember/test-helpers`. Page objects keep selectors out of assertions and survive markup churn during the migration.
 
 ```js
 // before
 assert.equal(this.$('.user-name').text().trim(), 'Ada');
 
-// after
-import { find } from '@ember/test-helpers';
-assert.equal(find('[data-test-user-name]').textContent.trim(), 'Ada');
+// after — define a page object once
+import { create, text } from 'ember-cli-page-object';
 
-// even better: qunit-dom
-assert.dom('[data-test-user-name]').hasText('Ada');
+const page = create({
+  userName: text('[data-test-user-name]'),
+});
+
+// then in the test
+assert.equal(page.userName, 'Ada');
 ```
 
 ### `{{action "save"}}` → `(action ...)` then `this.save` + `{{on}}`
