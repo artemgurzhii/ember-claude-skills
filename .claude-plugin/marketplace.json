@@ -7,8 +7,11 @@
   "plugins": [
     {
       "name": "ember-claude-skills",
-      "version": "0.1.0",
-      "source": ".",
+      "version": "0.1.1",
+      "source": {
+        "source": "github",
+        "repo": "artemgurzhii/ember-claude-skills"
+      },
       "description": "EmberJS plugin for Claude Code: Octane fundamentals, routing, components, services, Ember Data, testing, ecosystem addons, TypeScript/Glint, the Polaris transition, plus version-specific skills and migrator agents covering Ember 2.x → 3.x → 4.x → 5.x."
     }
   ]
