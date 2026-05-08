@@ -9,7 +9,7 @@ The plugin auto-routes by description: a session in a 5.x app pulls in modern sk
 From a Claude Code session:
 
 ```
-/plugin marketplace add artemhurzhii/ember-claude-skills
+/plugin marketplace add artemgurzhii/ember-claude-skills
 /plugin install ember-claude-skills@artemhurzhii
 ```
 
