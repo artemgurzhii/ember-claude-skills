@@ -1,6 +1,6 @@
 ---
 name: ember-ecosystem-addons
-description: Curated reference of top-rated Ember addons (per emberobserver.com) — what each one is for, when to install it, the canonical install command, and a tiny usage example. Covers ember-simple-auth, ember-concurrency, ember-test-selectors, ember-cli-page-object, ember-cli-mirage, ember-power-select, ember-modifier, ember-resources, ember-intl, ember-svg-jar, and more. Use when picking an addon, when debugging "what does this addon do," or when scaffolding a new feature that should reuse community standards.
+description: Curated reference of top-rated Ember addons (per emberobserver.com) — what each one is for, when to install it, the canonical install command, and a tiny usage example. Covers ember-simple-auth, ember-concurrency, ember-test-selectors, ember-cli-page-object, ember-cli-mirage, ember-basic-dropdown, ember-power-select, ember-power-calendar, ember-power-datepicker, ember-page-title, ember-shepherd, ember-modifier, ember-resources, ember-intl, ember-svg-jar, and more. Use when picking an addon, when debugging "what does this addon do," or when scaffolding a new feature that should reuse community standards.
 type: reference
 ---
 
@@ -156,9 +156,31 @@ Visual regression via Percy. Install only if you have a Percy account.
 
 ## Form / UI building blocks
 
+### [`ember-basic-dropdown`](https://ember-basic-dropdown.com)
+
+Headless dropdown primitive — handles positioning, click-outside, focus management, keyboard navigation, and rendering into a wormhole. The foundation `ember-power-select` and `ember-power-datepicker` are built on. Reach for it directly when you need a popover with the trigger / content split and don't want to reinvent positioning.
+
+```bash
+ember install ember-basic-dropdown
+```
+
+```hbs
+<BasicDropdown as |dd|>
+  <dd.Trigger class="btn">Filters</dd.Trigger>
+  <dd.Content class="dropdown-panel">
+    <ul>
+      <li><button type="button" {{on "click" (fn dd.actions.close)}}>All</button></li>
+      <li><button type="button" {{on "click" (fn dd.actions.close)}}>Mine</button></li>
+    </ul>
+  </dd.Content>
+</BasicDropdown>
+```
+
+`dd.actions` exposes `open`, `close`, `toggle`, `reposition` for imperative control. For a fully-styled menu, prefer `ember-primitives` `<Menu>`; reach for `ember-basic-dropdown` when you need raw positioning or are composing a higher-level widget.
+
 ### [`ember-power-select`](https://ember-power-select.com)
 
-The de-facto select / combobox / typeahead. Accessible, themeable, async-search–friendly.
+The de-facto select / combobox / typeahead. Accessible, themeable, async-search–friendly. Built on `ember-basic-dropdown`.
 
 ```bash
 ember install ember-power-select
@@ -176,7 +198,47 @@ ember install ember-power-select
 </PowerSelect>
 ```
 
-Companion: `ember-power-calendar`, `ember-power-select-typeahead`.
+Companion: `ember-power-select-typeahead` for free-text typeahead.
+
+### [`ember-power-calendar`](https://ember-power-calendar.com)
+
+Accessible single-date and date-range calendar. Use standalone for inline calendars or as the picker portion of `ember-power-datepicker`.
+
+```bash
+ember install ember-power-calendar
+ember install ember-power-calendar-luxon   # or -moment / -date-fns
+```
+
+```hbs
+<PowerCalendar @selected={{this.date}} @onSelect={{this.setDate}} as |cal|>
+  <cal.Nav />
+  <cal.Days />
+</PowerCalendar>
+```
+
+Pick exactly one date-library adapter (`-luxon`, `-moment`, `-date-fns`) — the base addon ships no formatter. For ranges, use `<PowerCalendarRange>` with `@selected={{hash start=... end=...}}`.
+
+### [`ember-power-datepicker`](https://github.com/cibernox/ember-power-datepicker)
+
+Date / range input that wires `ember-power-calendar` (the calendar) into `ember-basic-dropdown` (the popover). Drop-in picker for forms.
+
+```bash
+ember install ember-power-datepicker
+```
+
+```hbs
+<PowerDatepicker @selected={{this.startDate}} @onSelect={{this.setStart}} as |dp|>
+  <dp.Trigger class="input">
+    {{or (format-date this.startDate) "Pick a date"}}
+  </dp.Trigger>
+  <dp.Content>
+    <dp.Nav />
+    <dp.Days />
+  </dp.Content>
+</PowerDatepicker>
+```
+
+Same date-library adapter requirement as `ember-power-calendar` — install one of `-luxon` / `-moment` / `-date-fns`.
 
 ### [`ember-primitives`](https://github.com/universal-ember/ember-primitives)
 
@@ -306,6 +368,83 @@ ember install ember-svg-jar
 ```hbs
 {{svg-jar "user-circle" class="w-6 h-6"}}
 ```
+
+## Onboarding / guided tours
+
+### [`ember-shepherd`](https://github.com/shipshapecode/ember-shepherd)
+
+Ember wrapper around [Shepherd.js](https://shepherdjs.dev) — guided tours and onboarding tooltips. Exposes a `tour` service for adding steps, starting / cancelling, and listening to lifecycle events. Use it for first-run product tours, feature spotlights, and contextual help.
+
+```bash
+ember install ember-shepherd
+```
+
+```ts
+// app/components/onboarding-trigger.ts
+import Component from '@glimmer/component';
+import { service } from '@ember/service';
+import { action } from '@ember/object';
+import type TourService from 'ember-shepherd/services/tour';
+
+const STEPS = [
+  {
+    id: 'welcome',
+    title: 'Welcome',
+    text: 'Let us show you around.',
+    attachTo: { element: '.app-header', on: 'bottom' },
+    buttons: [{ text: 'Next', action() { return this.next(); } }],
+  },
+  {
+    id: 'compose',
+    title: 'Compose',
+    text: 'Click here to start a draft.',
+    attachTo: { element: '[data-test-compose]', on: 'right' },
+    buttons: [
+      { text: 'Back', action() { return this.back(); } },
+      { text: 'Done', action() { return this.complete(); } },
+    ],
+  },
+];
+
+export default class OnboardingTrigger extends Component {
+  @service declare tour: TourService;
+
+  @action async start() {
+    this.tour.set('defaultStepOptions', { cancelIcon: { enabled: true } });
+    this.tour.addSteps(STEPS);
+    await this.tour.start();
+  }
+}
+```
+
+Notes:
+- Import the bundled CSS (`shepherd.js/dist/css/shepherd.css`) or theme manually — the addon ships behavior, not styles.
+- Each step's `buttons[].action` runs in the tour-step context — use `this.next()`, `this.back()`, `this.complete()`, `this.cancel()`.
+- For step targets that mount asynchronously, wait for them before calling `start()` — otherwise the popper attaches to nothing and the step appears centered.
+- Listen for `complete` / `cancel` on `this.tour` to persist "user has seen onboarding" so it doesn't replay on every visit.
+
+## Document head / metadata
+
+### [`ember-page-title`](https://github.com/adopted-ember-addons/ember-page-title)
+
+Set `<title>` declaratively from any template. Multiple `{{page-title}}` calls across nested routes are joined automatically — child routes prepend, parents trail.
+
+```bash
+ember install ember-page-title
+```
+
+```hbs
+{{! app/templates/application.hbs }}
+{{page-title "Acme"}}
+
+{{! app/templates/posts.hbs }}
+{{page-title "Posts"}}
+
+{{! app/templates/posts/show.hbs }}
+{{page-title @model.title separator=" — "}}
+```
+
+Renders `<title>My First Post — Posts — Acme</title>`. Use the `separator` argument once at the leaf — it controls how that segment joins to its parent. Prefer this to manually setting `document.title` from routes; `ember-page-title` updates the head reactively as routes transition, plays well with FastBoot, and is the convention every Polaris app expects.
 
 ## Linting / quality
 
