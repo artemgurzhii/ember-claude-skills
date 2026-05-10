@@ -77,6 +77,8 @@ From a Claude Code session:
 | `/ember-route` | Scaffold a route with `model` hook, controller (if needed), template, and application test. |
 | `/ember-service` | Scaffold a service with TS types and a unit test. |
 | `/ember-test` | Run the test suite (QUnit) and triage failures. |
+| `/ember-review` | Review the current branch against Ember conventions — flag classic regressions, `(mut ...)`, `find()` in assertions, missing test selectors, etc. |
+| `/ember-upgrade` | Detect `ember-source` version and dispatch to the right migrator agent (refuses to skip LTS hops). |
 
 ## Version coverage
 
