@@ -27,6 +27,7 @@ From a Claude Code session:
 | `ember-services-and-state` | Singleton services, DI via `@service`, app-wide state, `@cached`, derived state. |
 | `ember-data` | Store, models, relationships, adapters, serializers, JSON:API, `@ember-data/request`. |
 | `ember-testing` | QUnit + `@ember/test-helpers`, `ember-test-selectors`, `ember-cli-page-object`, `ember-cli-mirage`, a11y. |
+| `ember-debugging` | Ember Inspector panels, deprecation source tracing, autotracking re-render audits, settled-state diagnosis. |
 | `ember-ecosystem-addons` | Top-rated addons from emberobserver.com — `ember-simple-auth`, `ember-concurrency`, `ember-power-select`, `ember-modifier`, `ember-resources`, `ember-intl`, `ember-svg-jar`, and more. |
 | `ember-typescript-and-glint` | TS in Ember, `@glint/environment-ember-loose` vs `@glint/environment-ember-template-imports`, type-safe templates. |
 | `ember-polaris-migration` | Template tag (`<template>`), `.gjs`/`.gts`, strict mode, route templates, mental model shifts. |
