@@ -34,7 +34,7 @@ type: reference | feedback | project      # required
 
 The description is what Claude reads to decide *whether to load this skill*. It must answer **"when should I use you,"** not "what are you."
 
-- **Target ~30–50 tokens.** Treat 80+ as a smell. The tweet that informs this contract called 9 tokens "efficient" and 45 already "inefficient" — we're slightly looser because Ember era distinctions need keywords, but enumerating 20 addons in a description is a flag of weak categorization, not strong triggering.
+- **Target ~30–50 tokens.** Treat 80+ as a smell. The blog article that informs this contract called 9 tokens "efficient" and 45 already "inefficient" — we're slightly looser because Ember era distinctions need keywords, but enumerating 20 addons in a description is a flag of weak categorization, not strong triggering.
 - **Always include a `Use when …` clause.** That's the trigger phrase Claude matches against the user's intent.
 - **Don't enumerate every concept** the skill covers. Pick the 4–6 highest-signal keywords and stop.
 
@@ -69,7 +69,7 @@ model: opus | sonnet | haiku            # only when the choice is intentional
 
 ### Tools
 
-- **Constrain to the minimum.** A subagent should never have main-thread-wide permissions. The tweet that informs this contract is explicit: "tools / disallowedTools: 限定能用什么工具，别给和主线程一样宽的权限."
+- **Constrain to the minimum.** A subagent should never have main-thread-wide permissions. The recommendations that inform this contract are explicit: "tools / disallowedTools: restrict which tools an agent can use — don't grant it the same breadth of permissions as the main thread."
 - **Don't grant `Agent`** unless the agent legitimately needs to spawn its own subagents. The migrators here don't.
 - **Don't grant `Write`** to read-only audit/review agents.
 
